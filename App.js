@@ -8,7 +8,8 @@ import ImpostorConfigScreen from './src/screens/impostor/ImpostorConfigScreen';
 import ImpostorRevealScreen from './src/screens/impostor/ImpostorRevealScreen';
 import ImpostorGameScreen from './src/screens/impostor/ImpostorGameScreen';
 import ImpostorResultScreen from './src/screens/impostor/ImpostorResultScreen';
-
+import AkisumGameScreen from './src/screens/akisum/AkisumGameScreen';
+import TabuConfigScreen from './src/screens/tabu/TabuConfigScreen';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -46,6 +47,16 @@ export default function App() {
           name="ImpostorResult" 
           component={ImpostorResultScreen}
           options={{ title: 'El Impostor - Resultados' }}
+        />
+        {/* <Stack.Screen 
+          name="AkisumGame" 
+          component={AkisumGameScreen}
+          options={{ title: 'akisuM' }}
+        /> */}
+        <Stack.Screen 
+          name="TabuConfig" 
+          component={TabuConfigScreen}
+          options={{ title: 'Tabú - Configuración' }}
         />
       </Stack.Navigator>
     </NavigationContainer>
