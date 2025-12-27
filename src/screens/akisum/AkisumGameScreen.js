@@ -7,234 +7,178 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import {
-  useAudioRecorder,
-  useAudioPlayer,
-  AudioModule,
-} from 'expo-audio';
+import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
+import { FFmpegKit } from 'ffmpeg-kit-react-native';
+
 
 export default function AkisumGameScreen({ navigation }) {
-  const recorder = useAudioRecorder();
-  const normalPlayer = useAudioPlayer();
-  const reversePlayer = useAudioPlayer();
-
+  const [recording, setRecording] = useState(null);
   const [recordedURI, setRecordedURI] = useState(null);
   const [reversedURI, setReversedURI] = useState(null);
+  const [sound, setSound] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackMode, setPlaybackMode] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
-    requestPermissions();
+    setupAudio();
+    return () => {
+      if (sound) {
+        sound.unloadAsync();
+      }
+    };
   }, []);
 
-  // Listener para cuando termine la reproducción normal
-  useEffect(() => {
-    if (normalPlayer.playing === false && playbackMode === 'normal' && isPlaying) {
-      setIsPlaying(false);
-      setPlaybackMode(null);
-    }
-  }, [normalPlayer.playing]);
+  const setupAudio = async () => {
+    await Audio.requestPermissionsAsync();
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+      playsInSilentModeIOS: true,
+    });
+  };
 
-  // Listener para cuando termine la reproducción reversa
-  useEffect(() => {
-    if (reversePlayer.playing === false && playbackMode === 'reverse' && isPlaying) {
-      setIsPlaying(false);
-      setPlaybackMode(null);
-    }
-  }, [reversePlayer.playing]);
-
-  const requestPermissions = async () => {
+  const startRecording = async () => {
     try {
-      const { granted } = await AudioModule.requestRecordingPermissionsAsync();
-      if (!granted) {
-        Alert.alert('Permiso denegado', 'Necesitamos permiso para grabar audio');
-      }
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
+      );
+
+      setRecording(recording);
+      setIsRecording(true);
     } catch (err) {
-      console.error('Error requesting permissions:', err);
+      console.error('Error al iniciar grabación:', err);
+      Alert.alert('Error', 'No se pudo iniciar la grabación');
     }
   };
 
-// Iniciar grabación
-const startRecording = async () => {
-  try {
-    const options = {
-      extension: '.m4a',
-      sampleRate: 44100,
-      numberOfChannels: 1,
-      bitRate: 128000,
-    };
-    
-    await recorder.record(options);
-    setIsRecording(true);
-  } catch (err) {
-    console.error('Error al iniciar grabación:', err);
-    Alert.alert('Error', 'No se pudo iniciar la grabación: ' + err.message);
-  }
-};
-
-  // Detener grabación
   const stopRecording = async () => {
+    if (!recording) return;
+
     try {
       setIsRecording(false);
-      const uri = await recorder.stop();
+      await recording.stopAndUnloadAsync();
+      const uri = recording.getURI();
       setRecordedURI(uri);
+      setRecording(null);
 
-      // Procesar audio en reversa automáticamente
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+      });
+
+      // Procesar audio en reversa
       await processReverseAudio(uri);
 
-      Alert.alert('¡Listo!', 'Audio grabado correctamente');
+      Alert.alert('¡Listo!', 'Audio grabado y procesado');
     } catch (err) {
       console.error('Error al detener grabación:', err);
-      Alert.alert('Error', 'No se pudo detener la grabación: ' + err.message);
+      Alert.alert('Error', 'No se pudo detener la grabación');
     }
   };
 
-  // Procesar audio en reversa
   const processReverseAudio = async (uri) => {
     setIsProcessing(true);
     try {
-      // Leer el archivo como base64
-      const audioData = await FileSystem.readAsStringAsync(uri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
+      const reversedUri = FileSystem.documentDirectory + 'reversed.m4a';
 
-      // Convertir base64 a array de bytes
-      const binaryString = atob(audioData);
-      const bytes = new Uint8Array(binaryString.length);
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-      }
-
-      // Para archivos de audio, buscar el header (primeros 44 bytes típicamente para WAV)
-      // Si no es WAV, intentamos invertir todo el contenido de audio
-      let headerSize = 44;
-      
-      // Verificar si es un archivo WAV (comienza con "RIFF")
-      const isWav = bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46;
-      
-      if (!isWav) {
-        // Si no es WAV, usar un header más pequeño o ninguno
-        headerSize = 0;
-      }
-
-      const header = bytes.slice(0, headerSize);
-      const audioContent = bytes.slice(headerSize);
-
-      // Invertir el contenido del audio (cada muestra es de 2 bytes en formato PCM 16-bit)
-      const reversedContent = new Uint8Array(audioContent.length);
-      const sampleSize = 2; // 16-bit = 2 bytes
-      const numSamples = Math.floor(audioContent.length / sampleSize);
-
-      for (let i = 0; i < numSamples; i++) {
-        const srcIndex = i * sampleSize;
-        const dstIndex = (numSamples - 1 - i) * sampleSize;
-        
-        if (dstIndex >= 0 && dstIndex + 1 < reversedContent.length) {
-          reversedContent[dstIndex] = audioContent[srcIndex];
-          if (srcIndex + 1 < audioContent.length) {
-            reversedContent[dstIndex + 1] = audioContent[srcIndex + 1];
-          }
-        }
-      }
-
-      // Combinar header con contenido invertido
-      const reversedBytes = new Uint8Array(header.length + reversedContent.length);
-      reversedBytes.set(header, 0);
-      reversedBytes.set(reversedContent, header.length);
-
-      // Convertir a base64
-      let binary = '';
-      for (let i = 0; i < reversedBytes.length; i++) {
-        binary += String.fromCharCode(reversedBytes[i]);
-      }
-      const reversedBase64 = btoa(binary);
-
-      // Guardar el archivo invertido
-      const reversedUri = FileSystem.documentDirectory + 'reversed_audio.m4a';
-      await FileSystem.writeAsStringAsync(reversedUri, reversedBase64, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
+      await FFmpegKit.execute(
+        `-i "${uri}" -af areverse "${reversedUri}"`
+      );
 
       setReversedURI(reversedUri);
-      setIsProcessing(false);
     } catch (err) {
-      console.error('Error al procesar audio en reversa:', err);
-      Alert.alert('Error', 'No se pudo procesar el audio en reversa: ' + err.message);
+      console.error('Error al procesar audio:', err);
+      Alert.alert('Error', 'No se pudo procesar el audio en reversa');
+    } finally {
       setIsProcessing(false);
     }
   };
 
-  // Reproducir audio normal
+
   const playNormal = async () => {
-    if (!recordedURI) {
-      Alert.alert('Error', 'No hay audio grabado');
-      return;
-    }
+    if (!recordedURI) return;
 
     try {
-      normalPlayer.replace(recordedURI);
-      normalPlayer.play();
+      if (sound) await sound.unloadAsync();
+
+      const { sound: newSound } = await Audio.Sound.createAsync(
+        { uri: recordedURI },
+        { shouldPlay: true }
+      );
+
+      setSound(newSound);
       setIsPlaying(true);
       setPlaybackMode('normal');
+
+      newSound.setOnPlaybackStatusUpdate((status) => {
+        if (status.didJustFinish) {
+          setIsPlaying(false);
+          setPlaybackMode(null);
+        }
+      });
     } catch (err) {
-      console.error('Error al reproducir:', err);
-      Alert.alert('Error', 'No se pudo reproducir el audio: ' + err.message);
+      console.error('Error:', err);
+      Alert.alert('Error', 'No se pudo reproducir');
     }
   };
 
-  // Reproducir audio en reversa
   const playReverse = async () => {
-    if (!reversedURI) {
-      Alert.alert('Error', 'No hay audio procesado en reversa');
-      return;
-    }
+    if (!reversedURI) return;
 
     try {
-      reversePlayer.replace(reversedURI);
-      reversePlayer.play();
+      if (sound) await sound.unloadAsync();
+
+      const { sound: newSound } = await Audio.Sound.createAsync(
+        { uri: reversedURI },
+        { shouldPlay: true }
+      );
+
+      setSound(newSound);
       setIsPlaying(true);
       setPlaybackMode('reverse');
+
+      newSound.setOnPlaybackStatusUpdate((status) => {
+        if (status.didJustFinish) {
+          setIsPlaying(false);
+          setPlaybackMode(null);
+        }
+      });
     } catch (err) {
-      console.error('Error al reproducir en reversa:', err);
-      Alert.alert('Error', 'No se pudo reproducir el audio en reversa: ' + err.message);
+      console.error('Error:', err);
+      Alert.alert('Error', 'No se pudo reproducir en reversa');
     }
   };
 
-  // Detener reproducción
-  const stopPlayback = () => {
-    if (playbackMode === 'normal') {
-      normalPlayer.pause();
-    } else if (playbackMode === 'reverse') {
-      reversePlayer.pause();
+  const stopPlayback = async () => {
+    if (sound) {
+      await sound.stopAsync();
+      setIsPlaying(false);
+      setPlaybackMode(null);
     }
-    setIsPlaying(false);
-    setPlaybackMode(null);
   };
 
-  // Borrar audio y empezar de nuevo
   const clearRecording = () => {
-    Alert.alert(
-      'Borrar grabación',
-      '¿Estás seguro que querés borrar la grabación actual?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Borrar',
-          style: 'destructive',
-          onPress: () => {
-            normalPlayer.pause();
-            reversePlayer.pause();
-            setRecordedURI(null);
-            setReversedURI(null);
-            setIsPlaying(false);
-            setPlaybackMode(null);
-          },
+    Alert.alert('Borrar grabación', '¿Estás seguro?', [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Borrar',
+        style: 'destructive',
+        onPress: async () => {
+          if (sound) await sound.unloadAsync();
+          setRecordedURI(null);
+          setReversedURI(null);
+          setSound(null);
+          setIsPlaying(false);
+          setPlaybackMode(null);
         },
-      ]
-    );
+      },
+    ]);
   };
 
   return (
