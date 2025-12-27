@@ -17,6 +17,7 @@ export default function TabuConfigScreen({ navigation }) {
   ]);
   const [selectedCategories, setSelectedCategories] = useState([1]); // General por defecto
   const [roundDuration, setRoundDuration] = useState(60); // segundos
+  const [numberOfRounds, setNumberOfRounds] = useState(3);
 
   // Agregar equipo
   const addTeam = () => {
@@ -73,10 +74,14 @@ export default function TabuConfigScreen({ navigation }) {
       return;
     }
 
-    navigation.navigate('TabuGame', {
+    // Ir a pantalla pre-juego en lugar de directo al juego
+    navigation.navigate('TabuPreGame', {
       teams: validTeams,
       selectedCategories,
       roundDuration,
+      currentTeamIndex: 0,
+      currentRound: 1,
+      totalRounds: numberOfRounds,
     });
   };
 
@@ -160,6 +165,35 @@ export default function TabuConfigScreen({ navigation }) {
                 ]}
               >
                 {duration}s
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
+      {/* Cantidad de Rondas */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Cantidad de Rondas</Text>
+        <Text style={styles.sectionSubtitle}>
+          Cada ronda todos los equipos juegan una vez
+        </Text>
+        <View style={styles.durationButtons}>
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((rounds) => (
+            <TouchableOpacity
+              key={rounds}
+              style={[
+                styles.durationButton,
+                numberOfRounds === rounds && styles.durationButtonActive,
+              ]}
+              onPress={() => setNumberOfRounds(rounds)}
+            >
+              <Text
+                style={[
+                  styles.durationButtonText,
+                  numberOfRounds === rounds && styles.durationButtonTextActive,
+                ]}
+              >
+                {rounds}
               </Text>
             </TouchableOpacity>
           ))}

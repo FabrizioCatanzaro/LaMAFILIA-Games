@@ -10,6 +10,9 @@ import ImpostorGameScreen from './src/screens/impostor/ImpostorGameScreen';
 import ImpostorResultScreen from './src/screens/impostor/ImpostorResultScreen';
 import AkisumGameScreen from './src/screens/akisum/AkisumGameScreen';
 import TabuConfigScreen from './src/screens/tabu/TabuConfigScreen';
+import TabuGameScreen from './src/screens/tabu/TabuGameScreen';
+import TabuPreGameScreen from './src/screens/tabu/TabuPreGameScreen';
+import TabuResultsScreen from './src/screens/tabu/TabuResultsScreen';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -48,15 +51,30 @@ export default function App() {
           component={ImpostorResultScreen}
           options={{ title: 'El Impostor - Resultados' }}
         />
-        {/* <Stack.Screen 
+        <Stack.Screen 
           name="AkisumGame" 
           component={AkisumGameScreen}
           options={{ title: 'akisuM' }}
-        /> */}
+        />
         <Stack.Screen 
           name="TabuConfig" 
           component={TabuConfigScreen}
           options={{ title: 'Tabú - Configuración' }}
+        />
+        <Stack.Screen 
+          name="TabuGame" 
+          component={TabuGameScreen}
+          options={{ title: 'Tabú - Juego' }}
+        />
+        <Stack.Screen 
+          name="TabuPreGame" 
+          component={TabuPreGameScreen}
+          options={{ title: 'Tabú', headerShown: false }}
+        />
+        <Stack.Screen 
+          name="TabuResults" 
+          component={TabuResultsScreen}
+          options={{ title: 'Tabú - Resultados' }}
         />
       </Stack.Navigator>
     </NavigationContainer>
