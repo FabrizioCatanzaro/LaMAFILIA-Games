@@ -1,20 +1,53 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+// Importamos las pantallas
+import HomeScreen from './src/screens/HomeScreen';
+import ImpostorConfigScreen from './src/screens/impostor/ImpostorConfigScreen';
+import ImpostorRevealScreen from './src/screens/impostor/ImpostorRevealScreen';
+import ImpostorGameScreen from './src/screens/impostor/ImpostorGameScreen';
+import ImpostorResultScreen from './src/screens/impostor/ImpostorResultScreen';
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator 
+        initialRouteName="Home"
+        screenOptions={{
+          headerStyle: { backgroundColor: '#6200ee' },
+          headerTintColor: '#fff',
+          headerTitleStyle: { fontWeight: 'bold' },
+        }}
+      >
+        <Stack.Screen 
+          name="Home" 
+          component={HomeScreen}
+          options={{ title: 'La Mafilia Games' }}
+        />
+        <Stack.Screen 
+          name="ImpostorConfig" 
+          component={ImpostorConfigScreen}
+          options={{ title: 'El Impostor - Configuración' }}
+        />
+        <Stack.Screen 
+          name="ImpostorReveal" 
+          component={ImpostorRevealScreen}
+          options={{ title: 'El Impostor - Revelación' }}
+        />
+        <Stack.Screen 
+          name="ImpostorGame" 
+          component={ImpostorGameScreen}
+          options={{ title: 'El Impostor - Juego' }}
+        />
+        <Stack.Screen 
+          name="ImpostorResult" 
+          component={ImpostorResultScreen}
+          options={{ title: 'El Impostor - Resultados' }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
