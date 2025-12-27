@@ -1399,13 +1399,4 @@ export const categories = [
       { word: 'Resaca', hint: 'Dia siguiente' }
     ]
   }
-
-
-
-
-
-
-
-
-
 ];
