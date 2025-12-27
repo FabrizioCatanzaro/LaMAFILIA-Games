@@ -10,7 +10,20 @@ export default function HomeScreen({ navigation }) {
       screen: 'ImpostorConfig',
       color: '#e74c3c'
     },
-    // Acá después agregaremos más juegos
+    // {
+    // id: 2,
+    // name: 'akisuM',
+    // description: '¡Canta canciones al revés!',
+    // screen: 'AkisumGame',
+    // color: '#9b59b6'
+    // },
+    {
+      id: 2,
+      name: 'Tabú',
+      description: '¡Adivina palabras con palabras prohibidas!',
+      screen: 'TabuConfig',
+      color: '#3498db'
+    }
   ];
 
   return (
