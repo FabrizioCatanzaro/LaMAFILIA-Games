@@ -51,11 +51,11 @@ export default function App() {
           component={ImpostorResultScreen}
           options={{ title: 'El Impostor - Resultados' }}
         />
-        <Stack.Screen 
+        {/* <Stack.Screen 
           name="AkisumGame" 
           component={AkisumGameScreen}
           options={{ title: 'akisuM' }}
-        />
+        /> */}
         <Stack.Screen 
           name="TabuConfig" 
           component={TabuConfigScreen}

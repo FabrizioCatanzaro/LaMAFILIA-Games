@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
-import { FFmpegKit } from 'ffmpeg-kit-react-native';
 
 
 export default function AkisumGameScreen({ navigation }) {
@@ -129,39 +128,31 @@ export default function AkisumGameScreen({ navigation }) {
   };
 
   const playReverse = async () => {
-    if (!reversedURI) return;
+    const { sound } = await Audio.Sound.createAsync(
+      { uri: recordedURI }
+    );
 
-    try {
-      if (sound) await sound.unloadAsync();
+    await sound.playFromPositionAsync(
+      (await sound.getStatusAsync()).durationMillis
+    );
 
-      const { sound: newSound } = await Audio.Sound.createAsync(
-        { uri: reversedURI },
-        { shouldPlay: true }
-      );
-
-      setSound(newSound);
-      setIsPlaying(true);
-      setPlaybackMode('reverse');
-
-      newSound.setOnPlaybackStatusUpdate((status) => {
-        if (status.didJustFinish) {
-          setIsPlaying(false);
-          setPlaybackMode(null);
-        }
-      });
-    } catch (err) {
-      console.error('Error:', err);
-      Alert.alert('Error', 'No se pudo reproducir en reversa');
-    }
+    sound.setOnPlaybackStatusUpdate((status) => {
+      if (status.positionMillis <= 0) {
+        sound.stopAsync();
+      } else {
+        sound.setPositionAsync(status.positionMillis - 100);
+      }
+    });
   };
 
-  const stopPlayback = async () => {
-    if (sound) {
-      await sound.stopAsync();
-      setIsPlaying(false);
-      setPlaybackMode(null);
-    }
-  };
+
+    const stopPlayback = async () => {
+      if (sound) {
+        await sound.stopAsync();
+        setIsPlaying(false);
+        setPlaybackMode(null);
+      }
+    };
 
   const clearRecording = () => {
     Alert.alert('Borrar grabación', '¿Estás seguro?', [
