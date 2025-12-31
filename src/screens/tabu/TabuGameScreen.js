@@ -7,6 +7,7 @@ import {
     Alert,
 } from 'react-native';
 import { tabuCategories } from '../../data/tabuWords';
+import { Audio } from 'expo-av';
 
 export default function TabuGameScreen({ route, navigation }) {
     const { teams: initialTeams, selectedCategories, roundDuration, currentTeamIndex: initialTeamIndex = 0, usedWords: initialUsedWords = [], currentRound = 1, totalRounds = 1 } = route.params;
@@ -32,6 +33,7 @@ export default function TabuGameScreen({ route, navigation }) {
   };
 
   // Seleccionar palabra aleatoria que no se haya usado
+  // Reemplazar la función selectRandomWord completa:
   const selectRandomWord = () => {
     const allWords = getAllWords();
     const availableWords = allWords.filter(
@@ -39,15 +41,95 @@ export default function TabuGameScreen({ route, navigation }) {
     );
 
     if (availableWords.length === 0) {
-      // Si no quedan palabras, reiniciar usadas
       setUsedWords([]);
       const randomWord = allWords[Math.floor(Math.random() * allWords.length)];
-      setCurrentWord(randomWord);
+      // Encontrar la categoría de esta palabra
+      const category = tabuCategories.find(cat => 
+        cat.words.some(w => w.word === randomWord.word)
+      );
+      setCurrentWord({ ...randomWord, category: category?.name || 'General' });
       setUsedWords([randomWord.word]);
     } else {
       const randomWord = availableWords[Math.floor(Math.random() * availableWords.length)];
-      setCurrentWord(randomWord);
+      // Encontrar la categoría de esta palabra
+      const category = tabuCategories.find(cat => 
+        cat.words.some(w => w.word === randomWord.word)
+      );
+      setCurrentWord({ ...randomWord, category: category?.name || 'General' });
       setUsedWords([...usedWords, randomWord.word]);
+    }
+  };
+
+  // Sonidos
+  const playTimerEndSound = async () => {
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        require('../../../assets/sounds/campana-fin.mp3')
+      );
+      await sound.playAsync();
+
+      // Limpieza
+      sound.setOnPlaybackStatusUpdate(status => {
+        if (status.didJustFinish) {
+          sound.unloadAsync();
+        }
+      });
+    } catch (err) {
+      console.log('Error reproduciendo sonido', err);
+    }
+  };
+
+  const playCorrectWordSound = async () => {
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        require('../../../assets/sounds/tabu-correcto.mp3')
+      );
+      await sound.playAsync();
+
+      // Limpieza
+      sound.setOnPlaybackStatusUpdate(status => {
+        if (status.didJustFinish) {
+          sound.unloadAsync();
+        }
+      });
+    } catch (err) {
+      console.log('Error reproduciendo sonido', err);
+    }
+  };
+
+  const playForbiddenWordSound = async () => {
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        require('../../../assets/sounds/tabu-prohibida.mp3')
+      );
+      await sound.playAsync();
+
+      // Limpieza
+      sound.setOnPlaybackStatusUpdate(status => {
+        if (status.didJustFinish) {
+          sound.unloadAsync();
+        }
+      });
+    } catch (err) {
+      console.log('Error reproduciendo sonido', err);
+    }
+  };
+
+  const playSkipWordSound = async () => {
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        require('../../../assets/sounds/tabu-pasar.mp3')
+      );
+      await sound.playAsync();
+
+      // Limpieza
+      sound.setOnPlaybackStatusUpdate(status => {
+        if (status.didJustFinish) {
+          sound.unloadAsync();
+        }
+      });
+    } catch (err) {
+      console.log('Error reproduciendo sonido', err);
     }
   };
 
@@ -64,6 +146,7 @@ export default function TabuGameScreen({ route, navigation }) {
         setTimeLeft((prev) => prev - 1);
       }, 1000);
     } else if (timeLeft === 0) {
+      playTimerEndSound();
       endRound();
     }
     return () => clearInterval(interval);
@@ -78,17 +161,20 @@ export default function TabuGameScreen({ route, navigation }) {
 
   // Palabra correcta
   const handleCorrect = () => {
+    playCorrectWordSound();
     setRoundScore(roundScore + 1);
     selectRandomWord();
   };
 
   // Pasar palabra
   const handleSkip = () => {
+    playSkipWordSound();
     selectRandomWord();
   };
 
   // Usó palabra prohibida
   const handleForbidden = () => {
+    playForbiddenWordSound();
     setRoundScore(Math.max(0, roundScore - 1));
     selectRandomWord();
   };
@@ -114,6 +200,9 @@ export default function TabuGameScreen({ route, navigation }) {
             navigation.replace('TabuResults', {
                 teams: updatedTeams,
                 isFinal: true,
+                selectedCategories,
+                roundDuration,     
+                totalRounds,       
             });
             } else {
             // Mostrar resultados intermedios
@@ -179,6 +268,7 @@ export default function TabuGameScreen({ route, navigation }) {
 
       {/* Palabra a adivinar */}
       <View style={styles.wordContainer}>
+        <Text style={styles.categoryBadge}>📂 Categoría: {currentWord.category}</Text>
         <Text style={styles.wordLabel}>Palabra a Adivinar:</Text>
         <Text style={styles.wordText}>{currentWord.word}</Text>
       </View>
@@ -379,5 +469,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#fff',
+  },
+  categoryBadge: {
+  fontSize: 14,
+  color: 'rgba(255,255,255,0.8)',
+  marginBottom: 5,
+  fontWeight: 'bold',
   },
 });

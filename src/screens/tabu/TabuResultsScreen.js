@@ -7,8 +7,8 @@ export default function TabuResultsScreen({ route, navigation }) {
     isFinal = true, 
     currentRound = 1, 
     totalRounds = 1,
-    selectedCategories,
-    roundDuration,
+    selectedCategories = [1],
+    roundDuration = 60,
     usedWords = []
   } = route.params;
 
@@ -19,10 +19,17 @@ export default function TabuResultsScreen({ route, navigation }) {
     navigation.popToTop();
   };
 
-  const playAgain = () => {
-    navigation.popToTop();
-    navigation.navigate('TabuConfig');
-  };
+const playAgain = () => {
+  navigation.popToTop();
+  navigation.navigate('TabuConfig', {
+    previousConfig: {
+      teams: teams.map(t => ({ ...t, score: 0 })), // Resetear puntajes
+      selectedCategories,
+      roundDuration,
+      totalRounds,
+    }
+  });
+};
 
   const nextRound = () => {
     // Ir a la siguiente ronda

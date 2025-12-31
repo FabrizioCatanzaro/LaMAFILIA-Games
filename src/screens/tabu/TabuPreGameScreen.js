@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 export default function TabuPreGameScreen({ route, navigation }) {
     const { teams, selectedCategories, roundDuration, currentTeamIndex = 0, usedWords = [], currentRound = 1, totalRounds = 1 } = route.params;
 
-  const currentTeam = teams[currentTeamIndex];
+    const currentTeam = teams[currentTeamIndex];
+    const [showCountdown, setShowCountdown] = useState(false);
+    const [countdown, setCountdown] = useState(3);
 
   const startRound = () => {
     navigation.replace('TabuGame', {
@@ -17,6 +19,31 @@ export default function TabuPreGameScreen({ route, navigation }) {
       totalRounds,
     });
   };
+  
+    // Countdown timer
+    useEffect(() => {
+      if (showCountdown && countdown > 0) {
+        const timer = setTimeout(() => {
+          setCountdown(countdown - 1);
+        }, 1000);
+        return () => clearTimeout(timer);
+      } else if (showCountdown && countdown === 0) {
+        // Cuando llega a 0, iniciar la ronda
+        startRound();
+      }
+    }, [showCountdown, countdown]);
+
+      // Pantalla de countdown
+      if (showCountdown) {
+        return (
+          <View style={styles.countdownContainer}>
+            <Text style={styles.countdownTitle}>¡Comienza el juego!</Text>
+            <Text style={styles.startingPlayerText}>Arranca:</Text>
+            <Text style={styles.startingPlayerName}>{currentTeam.name}</Text>
+            <Text style={styles.countdownNumber}>{countdown}</Text>
+          </View>
+        );
+      }
 
   return (
     <View style={styles.container}>
@@ -40,7 +67,7 @@ export default function TabuPreGameScreen({ route, navigation }) {
           </Text>
         </View>
 
-        <TouchableOpacity style={styles.startButton} onPress={startRound}>
+        <TouchableOpacity style={styles.startButton} onPress={() => setShowCountdown(true)}>
           <Text style={styles.startButtonText}>Comenzar</Text>
         </TouchableOpacity>
 
@@ -112,5 +139,36 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginBottom: 10,
     textAlign: 'center',
-},
+  },
+  countdownContainer: {
+    flex: 1,
+    backgroundColor: '#3498db',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  countdownTitle: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 40,
+    textAlign: 'center',
+  },
+  startingPlayerText: {
+    fontSize: 24,
+    color: '#fff',
+    marginBottom: 10,
+  },
+  startingPlayerName: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 60,
+    textAlign: 'center',
+  },
+  countdownNumber: {
+    fontSize: 120,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
 });

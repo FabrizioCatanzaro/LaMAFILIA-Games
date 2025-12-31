@@ -10,21 +10,40 @@ import {
 } from 'react-native';
 import { tabuCategories } from '../../data/tabuWords';
 
-export default function TabuConfigScreen({ navigation }) {
-  const [teams, setTeams] = useState([
-    { id: 1, name: 'Equipo 1', score: 0 },
-    { id: 2, name: 'Equipo 2', score: 0 },
-  ]);
-  const [selectedCategories, setSelectedCategories] = useState([1]); // General por defecto
-  const [roundDuration, setRoundDuration] = useState(60); // segundos
-  const [numberOfRounds, setNumberOfRounds] = useState(3);
+export default function TabuConfigScreen({ navigation, route }) {
+  const previousConfig = route.params?.previousConfig;
+
+  // Reiniciar IDs de equipos para evitar conflictos
+  const normalizedTeams = previousConfig?.teams 
+    ? previousConfig.teams.map((team, index) => ({
+        ...team,
+        id: index + 1,
+        score: 0
+      }))
+    : [
+        { id: 1, name: 'Equipo 1', score: 0 },
+        { id: 2, name: 'Equipo 2', score: 0 },
+      ];
+      
+  const [teams, setTeams] = useState(normalizedTeams);
+  const [selectedCategories, setSelectedCategories] = useState(
+    previousConfig?.selectedCategories || [1]
+  );
+  const [roundDuration, setRoundDuration] = useState(
+    previousConfig?.roundDuration || 60
+  );
+  const [numberOfRounds, setNumberOfRounds] = useState(
+    previousConfig?.totalRounds || 3
+  );
 
   // Agregar equipo
   const addTeam = () => {
     if (teams.length < 6) {
+      // Encontrar el ID máximo actual y sumar 1
+      const maxId = teams.length > 0 ? Math.max(...teams.map(t => t.id)) : 0;
       setTeams([
         ...teams,
-        { id: teams.length + 1, name: `Equipo ${teams.length + 1}`, score: 0 },
+        { id: maxId + 1, name: `Equipo ${teams.length + 1}`, score: 0 },
       ]);
     } else {
       Alert.alert('Límite alcanzado', 'Máximo 6 equipos');
@@ -74,7 +93,7 @@ export default function TabuConfigScreen({ navigation }) {
       return;
     }
 
-    // Ir a pantalla pre-juego en lugar de directo al juego
+        // Ir a pantalla pre-juego en lugar de directo al juego
     navigation.navigate('TabuPreGame', {
       teams: validTeams,
       selectedCategories,
