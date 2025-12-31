@@ -8,9 +8,10 @@ import {
   Modal,
   Alert,
 } from 'react-native';
+import { Audio } from 'expo-av';
 
 export default function ImpostorGameScreen({ route, navigation }) {
-  const { players, roles, secretWord, hint, gameDuration, showHint } = route.params;
+  const { players, roles, secretWord, hint, gameDuration, showHint, startingPlayer } = route.params;
 
   const [timeLeft, setTimeLeft] = useState(gameDuration * 60); // convertir a segundos
   const [isRunning, setIsRunning] = useState(true);
@@ -19,6 +20,24 @@ export default function ImpostorGameScreen({ route, navigation }) {
   const [activePlayers, setActivePlayers] = useState(
     players.map((name, index) => ({ name, role: roles[index], index }))
   );
+
+  const playEliminationSound = async () => {
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        require('../../../assets/sounds/impostor-eliminacion.mp3')
+      );
+      await sound.playAsync();
+
+      // Limpieza
+      sound.setOnPlaybackStatusUpdate(status => {
+        if (status.didJustFinish) {
+          sound.unloadAsync();
+        }
+      });
+    } catch (err) {
+      console.log('Error reproduciendo sonido', err);
+    }
+  };
 
   // Timer
   useEffect(() => {
@@ -51,9 +70,10 @@ export default function ImpostorGameScreen({ route, navigation }) {
         {
           text: 'Eliminar',
           onPress: () => {
+            playEliminationSound();
             Alert.alert(
-              '¡Votación!',
               `${votedPlayer.name} era un ${votedPlayer.role}`,
+              `Presiona el botón para continuar.`,
               [
                 {
                   text: 'Continuar',
@@ -136,6 +156,7 @@ export default function ImpostorGameScreen({ route, navigation }) {
           <Text style={[styles.timerText, timeLeft < 60 && styles.timerWarning]}>
             {formatTime(timeLeft)}
           </Text>
+          <Text style={styles.startingPlayer}>Empieza la ronda: {startingPlayer}</Text>
         </View>
 
         <TouchableOpacity
@@ -256,6 +277,11 @@ const styles = StyleSheet.create({
   timerText: {
     color: '#fff',
     fontSize: 36,
+    fontWeight: 'bold',
+  },
+  startingPlayer: {
+    color: '#fff',
+    fontSize: 22,
     fontWeight: 'bold',
   },
   timerWarning: {

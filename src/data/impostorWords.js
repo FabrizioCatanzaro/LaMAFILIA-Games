@@ -1,7 +1,7 @@
 export const categories = [
   {
     id: 1,
-    name: 'Animales',
+    name: '🐾 Animales',
     easy: [
       { word: 'Perro', hint: 'Mascota' },
       { word: 'Gato', hint: 'Mascota' },
@@ -71,7 +71,7 @@ export const categories = [
   },
   {
     id: 2,
-    name: 'Comidas',
+    name: '🍔 Comidas',
     easy: [
       { word: 'Pizza', hint: 'Italiana' },
       { word: 'Hamburguesa', hint: 'Pan' },
@@ -141,7 +141,7 @@ export const categories = [
   },
   {
     id: 3,
-    name: 'Películas',
+    name: '🎬 Películas',
     easy: [
       { word: 'Titanic', hint: 'Barco' },
       { word: 'Avatar', hint: 'Azules' },
@@ -211,7 +211,7 @@ export const categories = [
   },
   {
     id: 4,
-    name: 'Fútbol',
+    name: '⚽ Fútbol',
     easy: [
       { word: 'Messi', hint: 'Rosario' },
       { word: 'Ronaldo', hint: 'Portugal' },
@@ -281,7 +281,7 @@ export const categories = [
   },
   {
     id: 5,
-    name: 'Famosos Argentina',
+    name: '👨‍💼 Famosos Argentina',
     easy: [
       { word: 'Tinelli', hint: 'Showmatch' },
       { word: 'Messi', hint: 'Rosario' },
@@ -351,7 +351,7 @@ export const categories = [
   },
   {
     id: 6,
-    name: 'Famosos del Mundo',
+    name: '👨‍💼🌎 Famosos del Mundo',
     easy: [
       { word: 'Brad Pitt', hint: 'Hollywood' },
       { word: 'Angelina Jolie', hint: 'Actriz' },
@@ -421,7 +421,7 @@ export const categories = [
   },
   {
     id: 7,
-    name: 'Músicos Internacional',
+    name: '🎵🌎 Músicos Internacional',
     easy: [
       { word: 'Michael Jackson', hint: 'Rey del Pop' },
       { word: 'Madonna', hint: 'Camaleón' },
@@ -491,7 +491,7 @@ export const categories = [
   },
   {
     id: 8,
-    name: 'Músicos Argentina',
+    name: '🎵 Músicos Argentinos',
     easy: [
       { word: 'Charly García', hint: 'Rock nacional' },
       { word: 'Spinetta', hint: 'El Flaco' },
@@ -561,7 +561,7 @@ export const categories = [
   },
   {
     id: 9,
-    name: 'Frutas y Verduras',
+    name: '🍎 Frutas y Verduras',
     easy: [
       { word: 'Manzana', hint: 'Roja o verde' },
       { word: 'Banana', hint: 'Amarilla' },
@@ -631,7 +631,7 @@ export const categories = [
   },
   {
     id: 10,
-    name: 'Naturaleza',
+    name: '🌿 Naturaleza',
     easy: [
       { word: 'Árbol', hint: 'Tronco' },
       { word: 'Flor', hint: 'Pétalos' },
@@ -701,7 +701,7 @@ export const categories = [
   },
   {
     id: 11,
-    name: 'Objetos Cotidianos',
+    name: '🧺 Objetos Cotidianos',
     easy: [
       { word: 'Silla', hint: 'Sentarse' },
       { word: 'Mesa', hint: 'Comer' },
@@ -771,7 +771,7 @@ export const categories = [
   },
   {
     id: 12,
-    name: 'Lugares del Mundo',
+    name: '🌎 Lugares del Mundo',
     easy: [
       { word: 'Paris', hint: 'Francia' },
       { word: 'Roma', hint: 'Italia' },
@@ -841,7 +841,7 @@ export const categories = [
   },
   {
     id: 13,
-    name: 'Profesiones',
+    name: '👨‍💼💼 Profesiones',
     easy: [
       { word: 'Medico', hint: 'Salud' },
       { word: 'Profesor', hint: 'Enseñar' },
@@ -911,7 +911,7 @@ export const categories = [
   },
   {
     id: 14,
-    name: 'Tecnologia',
+    name: '💻 Tecnologia',
     easy: [
       { word: 'Internet', hint: 'Red' },
       { word: 'WiFi', hint: 'Señal' },
@@ -981,7 +981,7 @@ export const categories = [
   },
   {
     id: 15,
-    name: 'Objetos Raros',
+    name: '🧺 Objetos Raros',
     easy: [
       { word: 'Balanza', hint: 'Peso' },
       { word: 'Lupa', hint: 'Aumentar' },
@@ -1051,7 +1051,7 @@ export const categories = [
   },
   {
     id: 16,
-    name: 'Palabras Argentinas',
+    name: '🩵🤍🩵 Palabras Argentinas',
     easy: [
       { word: 'Che', hint: 'Llamado' },
       { word: 'Boludo', hint: 'Confianza' },
@@ -1121,7 +1121,7 @@ export const categories = [
   },
   {
     id: 17,
-    name: 'Cosas del Hogar',
+    name: '🧺 Cosas del Hogar',
     easy: [
       { word: 'Sillón', hint: 'Living' },
       { word: 'Mesa ratona', hint: 'Centro' },
@@ -1191,7 +1191,7 @@ export const categories = [
   },
   {
     id: 18,
-    name: 'Historia',
+    name: '📚 Historia',
     easy: [
       { word: 'Napoleon', hint: 'Francia' },
       { word: 'Julio Cesar', hint: 'Roma' },
@@ -1261,7 +1261,7 @@ export const categories = [
   },
   {
     id: 19,
-    name: 'Moda y Ropa',
+    name: '👕 Moda y Ropa',
     easy: [
       { word: 'Remera', hint: 'Parte de arriba' },
       { word: 'Jean', hint: 'Denim' },
@@ -1331,7 +1331,7 @@ export const categories = [
   },
   {
     id: 20,
-    name: 'Cosas que Pasan en una Fiesta',
+    name: '🎉 Cosas que Pasan en una Fiesta',
     easy: [
       { word: 'Brindis', hint: 'Copas' },
       { word: 'Musica fuerte', hint: 'Volumen' },

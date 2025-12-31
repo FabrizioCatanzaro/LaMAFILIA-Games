@@ -9,6 +9,8 @@ import {
   Animated,
 } from 'react-native';
 import { categories } from '../../data/impostorWords';
+import { Audio } from 'expo-av';
+
 
 export default function ImpostorRevealScreen({ route, navigation }) {
   const { players, impostorCount, showHint, selectedCategories, difficulty, gameDuration } = route.params;
@@ -29,6 +31,24 @@ export default function ImpostorRevealScreen({ route, navigation }) {
     selectWord();
   }, []);
 
+    const playTimerStartSound = async () => {
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        require('../../../assets/sounds/impostor-inicio.mp3')
+      );
+      await sound.playAsync();
+
+      // Limpieza
+      sound.setOnPlaybackStatusUpdate(status => {
+        if (status.didJustFinish) {
+          sound.unloadAsync();
+        }
+      });
+    } catch (err) {
+      console.log('Error reproduciendo sonido', err);
+    }
+  };
+
   // Countdown timer
   useEffect(() => {
     if (showCountdown && countdown > 0) {
@@ -37,6 +57,7 @@ export default function ImpostorRevealScreen({ route, navigation }) {
       }, 1000);
       return () => clearTimeout(timer);
     } else if (showCountdown && countdown === 0) {
+      playTimerStartSound();
       // Cuando llega a 0, navegar al juego
       navigation.navigate('ImpostorGame', {
         players,
@@ -252,6 +273,7 @@ const styles = StyleSheet.create({
   },
   coverScreen: {
     width: '100%',
+    height: '100%',
     padding: 40,
     backgroundColor: '#6200ee',
     borderRadius: 20,
